@@ -15,6 +15,7 @@ import { AstarCard } from '@/components/chains/AstarCard';
 import { MoonbeamCard } from '@/components/chains/MoonbeamCard';
 import { AcalaCard } from '@/components/chains/AcalaCard';
 import { PortfolioPieChart } from '@/components/charts/PortfolioPieChart';
+import { AIAdvisor } from '@/components/ai/AIAdvisor';
 import { Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -80,6 +81,9 @@ export function DashboardLayout() {
 
       {/* Visualization */}
       <PortfolioPieChart />
+
+      {/* AI Portfolio Advisor */}
+      <AIAdvisor />
     </div>
   );
 }
