@@ -1,0 +1,9 @@
+// Example: If you want to deploy with just 3 chains temporarily
+// Copy this to constants.ts if Acala continues having issues
+
+export const CHAIN_IDS: ChainId[] = ['polkadot', 'astar', 'moonbeam']; // Removed 'acala'
+
+// Also update the portfolio summary to say "3 chains" instead of "4 chains"
+// in src/components/dashboard/DashboardLayout.tsx
+
+

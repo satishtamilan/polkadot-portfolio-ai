@@ -1,0 +1,117 @@
+/**
+ * TESTNET Configuration (Westend)
+ * 
+ * Use this for DEMO purposes with FREE testnet tokens!
+ * Replace constants.ts content with this to use Westend testnet
+ * 
+ * To get free WND (Westend tokens):
+ * 1. Go to: https://faucet.polkadot.io/westend
+ * 2. Paste your address
+ * 3. Get free 10 WND instantly!
+ */
+
+import { ChainConfig, ChainId } from '@/types';
+
+export const APP_NAME = 'ChainLink Portfolio';
+export const APP_DESCRIPTION = 'Cross-chain asset tracker for Polkadot Cloud';
+export const APP_VERSION = '0.1.0';
+
+// TESTNET CHAINS - Use these for demo with free tokens!
+export const CHAINS: Record<ChainId, ChainConfig> = {
+  polkadot: {
+    id: 'polkadot',
+    name: 'Westend Testnet', // Changed to Westend
+    token: 'WND',            // Westend token
+    decimals: 12,            // Westend uses 12 decimals
+    rpc: 'wss://westend-rpc.polkadot.io',
+    fallbackRpc: 'wss://westend-rpc.dwellir.com',
+    explorer: 'https://westend.subscan.io',
+    color: '#E6007A',
+    logo: '/logos/polkadot.svg'
+  },
+  
+  // Rococo (Astar testnet equivalent)
+  astar: {
+    id: 'astar',
+    name: 'Rococo Asset Hub',
+    token: 'ROC',
+    decimals: 12,
+    rpc: 'wss://rococo-asset-hub-rpc.polkadot.io',
+    fallbackRpc: 'wss://rococo-rpc.polkadot.io',
+    explorer: 'https://rococo.subscan.io',
+    color: '#0070EB',
+    logo: '/logos/astar.svg'
+  },
+  
+  moonbeam: {
+    id: 'moonbeam',
+    name: 'Moonbase Alpha', // Moonbeam testnet
+    token: 'DEV',
+    decimals: 18,
+    rpc: 'wss://wss.api.moonbase.moonbeam.network',
+    fallbackRpc: 'wss://moonbase-alpha.public.blastapi.io',
+    explorer: 'https://moonbase.subscan.io',
+    color: '#53CBC9',
+    logo: '/logos/moonbeam.svg'
+  }
+};
+
+export const CHAIN_IDS: ChainId[] = ['polkadot', 'astar', 'moonbeam'];
+
+// For testnet, prices will be $0 (these are test tokens)
+export const PRICE_API = {
+  baseUrl: 'https://api.coingecko.com/api/v3',
+  tokenIds: {
+    WND: 'polkadot',  // Will return 0 for testnet
+    ROC: 'polkadot',
+    DEV: 'moonbeam'
+  },
+  cacheDuration: 5 * 60 * 1000
+};
+
+export const REFRESH_INTERVALS = {
+  chainData: 30 * 1000,
+  prices: 5 * 60 * 1000,
+  transactions: 60 * 1000
+};
+
+export const TIMEOUTS = {
+  chainConnection: 10 * 1000,
+  balanceQuery: 5 * 1000,
+  transactionQuery: 10 * 1000,
+  priceApi: 3 * 1000
+};
+
+export const STORAGE_KEYS = {
+  selectedAccount: 'chainlink_selected_account',
+  theme: 'chainlink_theme',
+  lastUpdate: 'chainlink_last_update'
+};
+
+export const UI = {
+  maxTransactions: 20,
+  balanceDecimals: 4,
+  usdDecimals: 2,
+  minPortfolioValue: 0.01
+};
+
+export const LINKS = {
+  polkadotDocs: 'https://wiki.polkadot.network/',
+  polkadotJsDocs: 'https://polkadot.js.org/docs/',
+  hackathon: 'https://polkadot.devpost.com/',
+  github: 'https://github.com/yourusername/chainlink-portfolio',
+  polkadotExtension: 'https://polkadot.js.org/extension/',
+  subwallet: 'https://subwallet.app/',
+  talisman: 'https://talisman.xyz/'
+};
+
+export const ERRORS = {
+  noExtension: 'Polkadot.js extension not found. Please install it from polkadot.js.org/extension/',
+  noAccounts: 'No accounts found in your wallet. Please create an account first.',
+  connectionFailed: 'Failed to connect to wallet. Please try again.',
+  chainConnectionFailed: 'Failed to connect to blockchain. Please check your internet connection.',
+  balanceQueryFailed: 'Failed to fetch balance. The chain might be experiencing issues.',
+  priceApiFailed: 'Failed to fetch token prices. Displaying balances without USD values.',
+  transactionQueryFailed: 'Failed to fetch transactions. This feature may be temporarily unavailable.'
+};
+

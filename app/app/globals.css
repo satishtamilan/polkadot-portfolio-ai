@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/**
+ * ChainLink Portfolio - Global Styles
+ * 
+ * Color scheme based on Polkadot ecosystem:
+ * - Primary: Polkadot Pink (#E6007A)
+ * - Secondary: Dark backgrounds for Web3 aesthetic
+ * - Chain-specific colors for visual distinction
+ */
+
+:root {
+  /* Base colors */
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  
+  /* Polkadot brand colors */
+  --polkadot-pink: #e6007a;
+  --polkadot-purple: #552bbf;
+  
+  /* Chain-specific colors */
+  --astar-blue: #0070eb;
+  --moonbeam-teal: #53cbc9;
+  --acala-red: #e40c5b;
+  
+  /* UI colors */
+  --card-background: #1a1a1a;
+  --card-border: #2a2a2a;
+  --hover: #252525;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  
+  /* Text colors */
+  --text-primary: #ededed;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-polkadot: var(--polkadot-pink);
+  --color-astar: var(--astar-blue);
+  --color-moonbeam: var(--moonbeam-teal);
+  --color-acala: var(--acala-red);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    to right,
+    var(--card-background) 0%,
+    var(--hover) 50%,
+    var(--card-background) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
