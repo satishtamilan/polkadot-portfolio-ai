@@ -26,7 +26,7 @@ export async function getPortfolioInsights(portfolioData: PortfolioData) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.1-8b-instant',
         messages: [
           {
             role: 'system',
@@ -89,7 +89,7 @@ export async function askAIQuestion(question: string, portfolioContext: Portfoli
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.1-8b-instant',
         messages: [
           {
             role: 'system',
