@@ -78,7 +78,7 @@ export function DashboardLayout() {
           <PolkadotCard />
           <AstarCard />
           <MoonbeamCard />
-          {/* <AcalaCard /> Temporarily disabled */}
+          <AcalaCard />
         </div>
 
         {/* Visualization */}
