@@ -64,26 +64,31 @@ export function DashboardLayout() {
 
   // Show dashboard when connected
   return (
-    <div className="space-y-6">
-      {/* Wallet Info */}
-      <WalletInfo />
+    <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
+      {/* Main Content - Left Side */}
+      <div className="space-y-6">
+        {/* Wallet Info */}
+        <WalletInfo />
 
-      {/* Portfolio Summary */}
-      <PortfolioSummary />
+        {/* Portfolio Summary */}
+        <PortfolioSummary />
 
-      {/* Chain Cards Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <PolkadotCard />
-        <AstarCard />
-        <MoonbeamCard />
-        {/* <AcalaCard /> Temporarily disabled */}
+        {/* Chain Cards Grid */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <PolkadotCard />
+          <AstarCard />
+          <MoonbeamCard />
+          {/* <AcalaCard /> Temporarily disabled */}
+        </div>
+
+        {/* Visualization */}
+        <PortfolioPieChart />
       </div>
 
-      {/* Visualization */}
-      <PortfolioPieChart />
-
-      {/* AI Portfolio Advisor */}
-      <AIAdvisor />
+      {/* AI Portfolio Advisor - Right Sidebar (Sticky) */}
+      <div className="lg:sticky lg:top-20 lg:h-fit">
+        <AIAdvisor />
+      </div>
     </div>
   );
 }
