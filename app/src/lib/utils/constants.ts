@@ -66,14 +66,14 @@ export const CHAINS: Record<ChainId, ChainConfig> = {
   
   acala: {
     id: 'acala',
-    name: 'Acala', // Display name (using Westend Collectives Hub as placeholder)
-    token: 'ACA', // Display as ACA (but querying Westend Collectives)
-    decimals: 12, // KEEP ORIGINAL
-    rpc: 'wss://westend-collectives-rpc.polkadot.io', // Testnet RPC with YOUR balances
-    fallbackRpc: 'wss://sys.ibp.network/collectives-westend',
-    explorer: 'https://collectives-westend.subscan.io',
-    color: '#E40C5B', // Acala red
-    logo: '/logos/acala.svg'
+    name: 'Kusama', // Display name (using Westend Bridge Hub - same faucet as others!)
+    token: 'KSM', // Display as KSM (but querying Westend Bridge Hub)
+    decimals: 12, // Standard Substrate decimals
+    rpc: 'wss://westend-bridge-hub-rpc.polkadot.io', // Westend Bridge Hub - very reliable!
+    fallbackRpc: 'wss://sys.ibp.network/bridge-hub-westend',
+    explorer: 'https://bridge-hub-westend.subscan.io',
+    color: '#000000', // Kusama black
+    logo: '/logos/acala.svg' // Will show as Kusama
   }
 };
 
