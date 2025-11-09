@@ -66,14 +66,14 @@ export const CHAINS: Record<ChainId, ChainConfig> = {
   
   acala: {
     id: 'acala',
-    name: 'Kusama', // Display name (using Westend Bridge Hub - same faucet as others!)
-    token: 'KSM', // Display as KSM (but querying Westend Bridge Hub)
-    decimals: 12, // Standard Substrate decimals
-    rpc: 'wss://westend-bridge-hub-rpc.polkadot.io', // Westend Bridge Hub - very reliable!
-    fallbackRpc: 'wss://sys.ibp.network/bridge-hub-westend',
-    explorer: 'https://bridge-hub-westend.subscan.io',
-    color: '#000000', // Kusama black
-    logo: '/logos/acala.svg' // Will show as Kusama
+    name: 'Paseo Asset Hub', // Asset Hub on Paseo testnet - same network as Polkadot card!
+    token: 'PAS', // Paseo tokens (same as your Polkadot card)
+    decimals: 10, // Paseo uses 10 decimals like DOT
+    rpc: 'wss://pas-rpc.stakeworld.io/assethub', // Paseo Asset Hub RPC
+    fallbackRpc: 'wss://sys.ibp.network/asset-hub-paseo',
+    explorer: 'https://assethub-paseo.subscan.io',
+    color: '#FF6B6B', // Asset Hub red
+    logo: '/logos/acala.svg'
   }
 };
 

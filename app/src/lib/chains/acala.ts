@@ -1,20 +1,21 @@
 /**
- * Acala Network Integration
+ * Paseo Asset Hub Integration
  * 
- * BLOCKCHAIN CONCEPT: Acala - DeFi Hub
- * ====================================
- * Acala is the DeFi hub of Polkadot, providing:
- * - Decentralized stablecoin (aUSD)
- * - Liquid staking (LDOT - liquid DOT)
- * - DEX (Decentralized Exchange)
- * - DeFi primitives and protocols
+ * BLOCKCHAIN CONCEPT: Asset Hub (System Parachain)
+ * =================================================
+ * Asset Hub is a system parachain that handles:
+ * - Asset issuance and management
+ * - NFT creation and transfers
+ * - Teleporting assets between parachains
+ * - Lower fees for asset operations
  * 
  * Key features:
- * - Multi-collateral stablecoin system
- * - Stake DOT while keeping liquidity (LDOT)
- * - EVM+ (Ethereum compatibility with Substrate features)
+ * - Create fungible tokens (PSP-22 equivalent)
+ * - Mint and trade NFTs
+ * - Bridge assets via XCM
+ * - Same address format as relay chain
  * 
- * Learn more: https://wiki.acala.network/
+ * Learn more: https://wiki.polkadot.network/docs/learn-assets
  */
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
@@ -35,15 +36,15 @@ async function createApi(useFallback = false): Promise<ApiPromise> {
 }
 
 /**
- * Query ACA balance for an account
+ * Query PAS balance for an account on Asset Hub
  * 
- * Acala uses 12 decimals
- * 1 ACA = 1,000,000,000,000 (10^12)
+ * Paseo uses 10 decimals (same as DOT)
+ * 1 PAS = 10,000,000,000 (10^10)
  * 
- * Note: Acala also has other tokens (aUSD, LDOT) but for MVP
- * we're focusing on the native token ACA.
+ * Asset Hub is a system parachain, so it uses the same
+ * address format as the relay chain (Paseo).
  * 
- * @param address - Acala address
+ * @param address - Paseo address
  * @returns Balance information
  */
 export async function getAcalaBalance(address: string): Promise<ChainBalance> {
@@ -83,12 +84,12 @@ export async function getAcalaBalance(address: string): Promise<ChainBalance> {
 export async function queryAcalaBalance(address: string) {
   return safeQuery(
     () => getAcalaBalance(address),
-    'Failed to fetch Acala balance. The network might be experiencing issues.'
+    'Failed to fetch Paseo Asset Hub balance. The network might be experiencing issues.'
   );
 }
 
 /**
- * Get Acala chain configuration
+ * Get Paseo Asset Hub chain configuration
  */
 export function getAcalaConfig() {
   return config;
