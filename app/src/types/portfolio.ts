@@ -39,6 +39,12 @@ export interface ChainPortfolio {
   /** Chain name */
   chainName: string;
   
+  /** Token symbol */
+  token: string;
+  
+  /** Formatted balance (human-readable) */
+  balance: number;
+  
   /** All balances on this chain */
   balances: ChainBalance[];
   
@@ -47,6 +53,9 @@ export interface ChainPortfolio {
   
   /** Percentage of total portfolio */
   percentage: number;
+  
+  /** 24h change percentage */
+  change24h?: number;
 }
 
 /**

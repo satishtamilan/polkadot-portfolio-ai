@@ -8,13 +8,17 @@
 
 interface PortfolioData {
   totalValue: number;
+  change24h?: number;
+  activeChains?: number;
   chains: Array<{
     name: string;
     token: string;
-    balance: string;
+    balance: number; // Formatted balance (not raw string)
     value: number;
     percentage: number;
+    change24h?: number;
   }>;
+  timestamp?: string;
 }
 
 export async function getPortfolioInsights(portfolioData: PortfolioData) {
@@ -42,19 +46,27 @@ export async function getPortfolioInsights(portfolioData: PortfolioData) {
           },
           {
             role: 'user',
-            content: `Analyze this Polkadot portfolio:
+            content: `Analyze this Polkadot ecosystem portfolio:
 
-Total Value: $${portfolioData.totalValue.toFixed(2)}
-
-Holdings:
+**CURRENT HOLDINGS:**
 ${portfolioData.chains.map(chain => 
-  `- ${chain.name}: ${chain.balance} ${chain.token} ($${chain.value.toFixed(2)}) - ${chain.percentage.toFixed(1)}%`
+  `• ${chain.name}: ${chain.balance.toFixed(2)} ${chain.token} = $${chain.value.toFixed(2)} USD (${chain.percentage.toFixed(1)}% of portfolio)`
 ).join('\n')}
 
+**TOTAL PORTFOLIO VALUE:** $${portfolioData.totalValue.toFixed(2)} USD
+**NUMBER OF CHAINS:** ${portfolioData.chains.length}
+**DIVERSIFICATION:** ${portfolioData.chains.length >= 3 ? 'Multi-chain' : 'Needs diversification'}
+
+IMPORTANT: The user ALREADY OWNS these tokens. Do NOT recommend buying tokens they already have. Instead:
+- Suggest optimal allocation percentages
+- Recommend staking strategies for existing holdings
+- Identify any gaps in ecosystem coverage
+- Suggest cross-chain yield strategies
+
 Provide:
-1. Risk Assessment (1-2 sentences)
-2. Top 3 Recommendations (specific actions)
-3. Potential Yield Opportunities`
+1. **Risk Assessment:** Analyze current allocation (1-2 sentences)
+2. **Top 3 Recommendations:** Specific actions based on CURRENT holdings
+3. **Yield Opportunities:** Staking/DeFi for tokens they ALREADY own`
           }
         ],
         temperature: 0.7,
@@ -93,13 +105,21 @@ export async function askAIQuestion(question: string, portfolioContext: Portfoli
         messages: [
           {
             role: 'system',
-            content: `You are a Polkadot ecosystem expert. Answer questions about the user's portfolio and Polkadot ecosystem.
+            content: `You are a Polkadot ecosystem expert advisor. 
             
-            User's Portfolio Context:
-            - Total Value: $${portfolioContext.totalValue.toFixed(2)}
-            - Holdings: ${portfolioContext.chains.map(c => `${c.name}: ${c.balance} ${c.token}`).join(', ')}
+**USER'S CURRENT PORTFOLIO:**
+${portfolioContext.chains.map(c => `• ${c.name}: ${c.balance.toFixed(2)} ${c.token} ($${c.value.toFixed(2)} USD)`).join('\n')}
+**Total Value:** $${portfolioContext.totalValue.toFixed(2)} USD
+
+IMPORTANT: These are tokens the user ALREADY OWNS. Base your advice on their CURRENT holdings.
             
-            Provide specific, actionable answers. Mention real protocols, APYs, and opportunities in Polkadot ecosystem.`
+Provide specific, actionable answers about:
+- Staking opportunities for tokens they OWN
+- Yield farming on chains they're ALREADY on
+- Cross-chain strategies using XCM
+- Real protocols: Polkadot Nomination Pools (15% APY), Astar dApp Staking (12% APY), Moonbeam DEXs (BeamSwap, StellaSwap)
+
+Keep responses concise and practical.`
           },
           {
             role: 'user',

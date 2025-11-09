@@ -27,6 +27,21 @@ export function calculateUsdValue(
 }
 
 /**
+ * Format balance from raw string to human-readable number
+ * 
+ * @param balance - Raw balance string
+ * @param decimals - Token decimals
+ * @returns Formatted balance as number
+ */
+export function formatBalance(
+  balance: string,
+  decimals: number
+): number {
+  if (!balance) return 0;
+  return Number(balance) / Math.pow(10, decimals);
+}
+
+/**
  * Aggregate balances into portfolio
  * 
  * @param balances - Map of chain IDs to balance data
@@ -47,6 +62,7 @@ export function aggregatePortfolio(
     const chainConfig = CHAINS[chainId];
     const price = prices.get(chainConfig.token);
     const priceUsd = price?.usd || 0;
+    const change24h = price?.change24h || 0;
 
     // Calculate chain value
     const chainValue = calculateUsdValue(
@@ -55,14 +71,20 @@ export function aggregatePortfolio(
       priceUsd
     );
 
+    // Format balance for human readability
+    const formattedBalance = formatBalance(balance.total, chainConfig.decimals);
+
     totalValue += chainValue;
 
     chainPortfolios.push({
       chain: chainId,
       chainName: chainConfig.name,
+      token: chainConfig.token,
+      balance: formattedBalance, // Formatted balance
       balances: [{ ...balance, usdValue: chainValue }],
       totalValue: chainValue,
-      percentage: 0 // Will be calculated after we know total
+      percentage: 0, // Will be calculated after we know total
+      change24h: change24h
     });
   }
 
