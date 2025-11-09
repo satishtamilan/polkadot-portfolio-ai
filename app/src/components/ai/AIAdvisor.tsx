@@ -32,26 +32,38 @@ export function AIAdvisor() {
     setIsLoading(true);
     setError(null);
 
-    const portfolioData = {
-      totalValue: portfolio.totalValue,
-      chains: portfolio.chains.map(chain => ({
-        name: chain.chainName,
-        token: chain.token,
-        balance: chain.balance,
-        value: chain.totalValue,
-        percentage: chain.percentage
-      }))
-    };
+    try {
+      // Get FRESH portfolio data (re-read from context to get latest values)
+      const portfolioData = {
+        totalValue: portfolio.totalValue,
+        change24h: portfolio.change24h,
+        activeChains: portfolio.chains.length,
+        chains: portfolio.chains.map(chain => ({
+          name: chain.chainName,
+          token: chain.token,
+          balance: chain.balance,
+          value: chain.totalValue,
+          percentage: chain.percentage,
+          change24h: chain.change24h
+        })),
+        timestamp: new Date().toISOString()
+      };
 
-    const result = await getPortfolioInsights(portfolioData);
+      console.log('Sending portfolio data to AI:', portfolioData);
 
-    if (result.success) {
-      setInsights(result.insights);
-    } else {
-      setError(result.error || 'Failed to get insights');
+      const result = await getPortfolioInsights(portfolioData);
+
+      if (result.success) {
+        setInsights(result.insights);
+      } else {
+        setError(result.error || 'Failed to get insights');
+      }
+    } catch (err) {
+      setError('Failed to analyze portfolio. Please try again.');
+      console.error('AI insights error:', err);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleAskQuestion = async () => {
@@ -60,27 +72,39 @@ export function AIAdvisor() {
     setIsLoading(true);
     setError(null);
 
-    const portfolioData = {
-      totalValue: portfolio.totalValue,
-      chains: portfolio.chains.map(chain => ({
-        name: chain.chainName,
-        token: chain.token,
-        balance: chain.balance,
-        value: chain.totalValue,
-        percentage: chain.percentage
-      }))
-    };
+    try {
+      // Get FRESH portfolio data for chat
+      const portfolioData = {
+        totalValue: portfolio.totalValue,
+        change24h: portfolio.change24h,
+        activeChains: portfolio.chains.length,
+        chains: portfolio.chains.map(chain => ({
+          name: chain.chainName,
+          token: chain.token,
+          balance: chain.balance,
+          value: chain.totalValue,
+          percentage: chain.percentage,
+          change24h: chain.change24h
+        })),
+        timestamp: new Date().toISOString()
+      };
 
-    const result = await askAIQuestion(question, portfolioData);
+      console.log('Chat - Sending portfolio data to AI:', portfolioData);
 
-    if (result.success) {
-      setChatHistory([...chatHistory, { q: question, a: result.answer }]);
-      setQuestion('');
-    } else {
-      setError(result.error || 'Failed to get answer');
+      const result = await askAIQuestion(question, portfolioData);
+
+      if (result.success) {
+        setChatHistory([...chatHistory, { q: question, a: result.answer }]);
+        setQuestion('');
+      } else {
+        setError(result.error || 'Failed to get answer');
+      }
+    } catch (err) {
+      setError('Failed to get answer. Please try again.');
+      console.error('AI chat error:', err);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const suggestedQuestions = [
