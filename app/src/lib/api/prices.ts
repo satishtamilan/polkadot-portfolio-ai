@@ -53,6 +53,28 @@ export async function fetchTokenPrices(
 
   // Fetch uncached prices
   try {
+    // Handle PAS token separately (not on CoinGecko - it's a testnet token)
+    // Give it same price as DOT for demo purposes
+    const pasIndex = uncachedSymbols.indexOf('PAS');
+    if (pasIndex !== -1) {
+      // If DOT price exists, use it for PAS
+      const dotPrice = prices.get('DOT');
+      if (dotPrice) {
+        const pasPrice: TokenPrice = {
+          symbol: 'PAS',
+          usd: dotPrice.usd, // Same as DOT for demo
+          change24h: dotPrice.change24h || 0,
+          lastUpdated: now
+        };
+        prices.set('PAS', pasPrice);
+        priceCache.set('PAS', { price: pasPrice, timestamp: now });
+      } else {
+        // If DOT not fetched yet, fetch it first
+        uncachedSymbols.push('DOT');
+      }
+      uncachedSymbols.splice(pasIndex, 1); // Remove PAS from API call
+    }
+
     // Map symbols to CoinGecko IDs
     const ids = uncachedSymbols
       .map((symbol) => PRICE_API.tokenIds[symbol as keyof typeof PRICE_API.tokenIds])
@@ -60,7 +82,8 @@ export async function fetchTokenPrices(
       .join(',');
 
     if (!ids) {
-      throw new Error('No valid token IDs to fetch');
+      // No real tokens to fetch, return what we have
+      return prices;
     }
 
     // Fetch from CoinGecko

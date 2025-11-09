@@ -39,7 +39,8 @@ export function MultiChainProvider({ children }: MultiChainProviderProps) {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch REAL prices from CoinGecko for display tokens
-  const { prices } = usePrices(['DOT', 'ASTR', 'GLMR'], isConnected);
+  // PAS token doesn't exist on CoinGecko, so we'll add a mock price
+  const { prices } = usePrices(['DOT', 'ASTR', 'GLMR', 'PAS'], isConnected);
 
   /**
    * Fetch balances from all chains in parallel
@@ -60,7 +61,7 @@ export function MultiChainProvider({ children }: MultiChainProviderProps) {
         queryPolkadotBalance(selectedAccount.address),
         queryAstarBalance(selectedAccount.address),
         queryMoonbeamBalance(selectedAccount.address),
-        // queryAcalaBalance(selectedAccount.address) // Temporarily disabled
+        queryAcalaBalance(selectedAccount.address) // Paseo Asset Hub - RE-ENABLED!
       ]);
 
       const newBalances = new Map<ChainId, ChainBalance | null>();
