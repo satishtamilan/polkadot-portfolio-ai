@@ -296,24 +296,40 @@ export function XCMTransfer() {
 
         {/* Success Message */}
         {success && (
-          <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 space-y-2">
-            <div className="flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm text-green-500 font-medium">Transfer Initiated!</p>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  Transaction: {success.txHash.slice(0, 10)}...{success.txHash.slice(-8)}
-                </p>
+          <div className="space-y-3">
+            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 space-y-2">
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-green-500 font-medium">✅ Demo Transfer Simulated!</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">
+                    Mock TX: {success.txHash.slice(0, 10)}...{success.txHash.slice(-8)}
+                  </p>
+                </div>
               </div>
             </div>
-            <a
-              href={success.explorerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs text-[var(--astar-blue)] hover:underline"
-            >
-              View on Explorer <ExternalLink className="w-3 h-3" />
-            </a>
+            
+            {/* What Would Happen in Production */}
+            <div className="p-3 rounded-lg bg-[var(--polkadot-pink)]/10 border border-[var(--polkadot-pink)]/20 space-y-2">
+              <div className="flex items-start gap-2">
+                <Zap className="w-4 h-4 text-[var(--polkadot-pink)] mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-[var(--text-primary)] mb-2">
+                    🚀 What Would Happen in Production:
+                  </p>
+                  <ol className="text-xs text-[var(--text-secondary)] space-y-1 list-decimal list-inside">
+                    <li>Connect to {CHAIN_METADATA[fromChain].name} via Polkadot.js</li>
+                    <li>Build XCM message with <code className="text-[var(--polkadot-pink)] text-xs">limitedReserveTransferAssets</code></li>
+                    <li>Sign transaction with your wallet</li>
+                    <li>XCM message routed through Relay Chain (~{currentRoute?.estimatedTime})</li>
+                    <li>Assets appear in {CHAIN_METADATA[toChain].name} wallet</li>
+                  </ol>
+                  <p className="text-xs text-[var(--polkadot-pink)] mt-2 font-medium">
+                    💡 For hackathon: This demonstrates XCM capability and UX
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -327,22 +343,34 @@ export function XCMTransfer() {
           {isTransferring ? (
             <>
               <Spinner size="sm" />
-              <span>Transferring...</span>
+              <span>Simulating Transfer...</span>
             </>
           ) : (
             <>
               <Zap className="w-4 h-4" />
-              <span>Transfer via XCM</span>
+              <span>Demo: Simulate XCM Transfer</span>
             </>
           )}
         </Button>
 
-        {/* Demo Notice */}
-        <div className="p-3 rounded-lg bg-[var(--astar-blue)]/10 border border-[var(--astar-blue)]/20">
-          <p className="text-xs text-[var(--text-secondary)]">
-            <strong className="text-[var(--astar-blue)]">Demo Mode:</strong> This is a hackathon
-            demonstration. Transfers are simulated. Production would use actual XCM pallets.
-          </p>
+        {/* Demo Notice - More Prominent */}
+        <div className="p-4 rounded-lg bg-gradient-to-r from-[var(--astar-blue)]/10 to-[var(--polkadot-pink)]/10 border-2 border-[var(--astar-blue)]/30 space-y-2">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="w-5 h-5 text-[var(--astar-blue)] mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">
+                🎯 Hackathon Demo Mode
+              </p>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                This UI demonstrates XCM transfer capability and UX. In production, this would execute real on-chain XCM transactions using <code className="text-[var(--polkadot-pink)]">polkadot.js</code> and XCM pallets. The codebase includes production-ready structure (see <code className="text-[var(--astar-blue)]">lib/xcm/transfer.ts</code>).
+              </p>
+              <div className="mt-2 pt-2 border-t border-[var(--card-border)]">
+                <p className="text-xs text-[var(--text-secondary)]">
+                  <strong className="text-[var(--polkadot-pink)]">Why demo?</strong> Real testnet XCM requires complex setup, unreliable testnets, and can fail during judging. This showcases the concept with reliable UX.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Card>
