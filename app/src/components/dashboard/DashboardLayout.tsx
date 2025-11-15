@@ -16,6 +16,8 @@ import { MoonbeamCard } from '@/components/chains/MoonbeamCard';
 import { AcalaCard } from '@/components/chains/AcalaCard';
 import { PortfolioPieChart } from '@/components/charts/PortfolioPieChart';
 import { FloatingAIChat } from '@/components/ai/FloatingAIChat';
+import { HealthScore } from '@/components/portfolio/HealthScore';
+import { XCMTransfer } from '@/components/xcm/XCMTransfer';
 import { Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -70,8 +72,11 @@ export function DashboardLayout() {
         {/* Wallet Info */}
         <WalletInfo />
 
-        {/* Portfolio Summary */}
-        <PortfolioSummary />
+        {/* Portfolio Summary & Health Score - Side by Side */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <PortfolioSummary />
+          <HealthScore />
+        </div>
 
         {/* Chain Cards Grid */}
         <div className="grid gap-6 md:grid-cols-2">
@@ -81,8 +86,11 @@ export function DashboardLayout() {
           <AcalaCard />
         </div>
 
-        {/* Visualization */}
-        <PortfolioPieChart />
+        {/* XCM Transfer & Visualization */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <XCMTransfer />
+          <PortfolioPieChart />
+        </div>
       </div>
 
       {/* Floating AI Chat - Bottom Right Corner */}

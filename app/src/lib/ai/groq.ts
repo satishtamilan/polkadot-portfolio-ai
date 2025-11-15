@@ -38,11 +38,12 @@ export async function getPortfolioInsights(portfolioData: PortfolioData) {
             - Risk assessment (concentration risk, diversification)
             - Specific recommendations for Polkadot ecosystem
             - Staking opportunities (Polkadot nomination pools 15% APY, Astar dApp staking 12% APY)
-            - Cross-chain strategies using XCM
+            - XCM cross-chain transfer opportunities (e.g., move DOT to Asset Hub for better yields)
+            - Cross-chain yield strategies using XCM
             - DeFi opportunities on Moonbeam (BeamSwap, StellaSwap)
             
             Keep responses concise, actionable, and specific to the Polkadot ecosystem.
-            Use emojis sparingly for emphasis.`
+            Use emojis sparingly for emphasis. ALWAYS mention XCM capabilities when relevant.`
           },
           {
             role: 'user',
@@ -60,13 +61,14 @@ ${portfolioData.chains.map(chain =>
 IMPORTANT: The user ALREADY OWNS these tokens. Do NOT recommend buying tokens they already have. Instead:
 - Suggest optimal allocation percentages
 - Recommend staking strategies for existing holdings
+- Suggest XCM transfers to move assets between chains for better yields
 - Identify any gaps in ecosystem coverage
-- Suggest cross-chain yield strategies
+- Suggest cross-chain yield strategies using XCM
 
 Provide:
 1. **Risk Assessment:** Analyze current allocation (1-2 sentences)
-2. **Top 3 Recommendations:** Specific actions based on CURRENT holdings
-3. **Yield Opportunities:** Staking/DeFi for tokens they ALREADY own`
+2. **Top 3 Recommendations:** Specific actions based on CURRENT holdings (include XCM transfers if beneficial)
+3. **XCM Opportunities:** Any cross-chain transfers that would improve yields or reduce risk`
           }
         ],
         temperature: 0.7,
