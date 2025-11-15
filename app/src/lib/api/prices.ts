@@ -57,22 +57,8 @@ export async function fetchTokenPrices(
     // Give it same price as DOT for demo purposes
     const pasIndex = uncachedSymbols.indexOf('PAS');
     if (pasIndex !== -1) {
-      // If DOT price exists, use it for PAS
-      const dotPrice = prices.get('DOT');
-      if (dotPrice) {
-        const pasPrice: TokenPrice = {
-          symbol: 'PAS',
-          usd: dotPrice.usd, // Same as DOT for demo
-          change24h: dotPrice.change24h || 0,
-          lastUpdated: now
-        };
-        prices.set('PAS', pasPrice);
-        priceCache.set('PAS', { price: pasPrice, timestamp: now });
-      } else {
-        // If DOT not fetched yet, fetch it first
-        uncachedSymbols.push('DOT');
-      }
       uncachedSymbols.splice(pasIndex, 1); // Remove PAS from API call
+      // We'll set PAS price after DOT is fetched
     }
 
     // Map symbols to CoinGecko IDs
@@ -82,7 +68,20 @@ export async function fetchTokenPrices(
       .join(',');
 
     if (!ids) {
-      // No real tokens to fetch, return what we have
+      // No real tokens to fetch, but check if we need PAS price
+      if (pasIndex !== -1) {
+        const dotPrice = prices.get('DOT');
+        if (dotPrice) {
+          const pasPrice: TokenPrice = {
+            symbol: 'PAS',
+            usd: dotPrice.usd,
+            change24h: dotPrice.change24h || 0,
+            lastUpdated: now
+          };
+          prices.set('PAS', pasPrice);
+          priceCache.set('PAS', { price: pasPrice, timestamp: now });
+        }
+      }
       return prices;
     }
 
@@ -113,6 +112,24 @@ export async function fetchTokenPrices(
 
         prices.set(symbol, priceData);
         priceCache.set(symbol, { price: priceData, timestamp: now });
+      }
+    }
+
+    // Now set PAS price if it was requested (use DOT price)
+    if (pasIndex !== -1) {
+      const dotPrice = prices.get('DOT');
+      if (dotPrice) {
+        const pasPrice: TokenPrice = {
+          symbol: 'PAS',
+          usd: dotPrice.usd, // Same as DOT for demo
+          change24h: dotPrice.change24h || 0,
+          lastUpdated: now
+        };
+        prices.set('PAS', pasPrice);
+        priceCache.set('PAS', { price: pasPrice, timestamp: now });
+        console.log('✅ Set PAS price from DOT:', pasPrice);
+      } else {
+        console.warn('⚠️ Could not set PAS price - DOT price not available');
       }
     }
   } catch (error) {
