@@ -64,6 +64,13 @@ export function MultiChainProvider({ children }: MultiChainProviderProps) {
         queryAcalaBalance(selectedAccount.address) // Paseo Asset Hub - RE-ENABLED!
       ]);
 
+      console.log('=== CHAIN QUERY RESULTS ===');
+      console.log('Polkadot:', results[0]);
+      console.log('Astar:', results[1]);
+      console.log('Moonbeam:', results[2]);
+      console.log('Acala/Paseo Asset Hub:', results[3]);
+      console.log('===========================');
+
       const newBalances = new Map<ChainId, ChainBalance | null>();
 
       // Process results
@@ -72,9 +79,10 @@ export function MultiChainProvider({ children }: MultiChainProviderProps) {
         
         if (result.status === 'fulfilled' && result.value.success) {
           newBalances.set(chainId, result.value.data);
+          console.log(`✅ ${chainId} balance loaded:`, result.value.data);
         } else {
           newBalances.set(chainId, null);
-          console.error(`Failed to fetch ${chainId} balance:`, 
+          console.error(`❌ Failed to fetch ${chainId} balance:`, 
             result.status === 'rejected' ? result.reason : result.value.error);
         }
       });
@@ -105,6 +113,12 @@ export function MultiChainProvider({ children }: MultiChainProviderProps) {
   const portfolio = balances.size > 0 && prices.size > 0
     ? aggregatePortfolio(balances, prices)
     : null;
+
+  console.log('=== PORTFOLIO DATA ===');
+  console.log('Balances map size:', balances.size);
+  console.log('Balances map keys:', Array.from(balances.keys()));
+  console.log('Portfolio chains:', portfolio?.chains.map(c => c.chainName));
+  console.log('======================');
 
   const value: MultiChainState = {
     balances,
