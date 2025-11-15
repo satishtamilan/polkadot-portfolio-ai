@@ -37,15 +37,18 @@ export function PortfolioPieChart() {
     );
   }
 
-  // Prepare data for chart
+  // Prepare data for chart - show ALL chains with balance, even very small ones
   const chartData = portfolio.chains
-    .filter(c => c.totalValue > 0)
+    .filter(c => c.totalValue > 0.001) // Show even very small balances (above $0.001)
     .map(chain => ({
       name: chain.chainName,
       value: chain.totalValue,
       percentage: chain.percentage,
       color: CHAINS[chain.chain].color
     }));
+
+  console.log('Portfolio chains for pie chart:', portfolio.chains);
+  console.log('Chart data:', chartData);
 
   if (chartData.length === 0) {
     return null;
