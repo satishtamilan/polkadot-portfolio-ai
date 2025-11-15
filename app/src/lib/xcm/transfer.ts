@@ -126,8 +126,9 @@ export async function executeXCMTransfer(
       throw new Error('XCM transfers only work in browser');
     }
 
-    // Dynamically import Polkadot extension functions
+    // Dynamically import Polkadot extension functions and utilities
     const { web3FromAddress } = await import('@polkadot/extension-dapp');
+    const { decodeAddress } = await import('@polkadot/util-crypto');
     
     // Connect to source chain
     const provider = new WsProvider(CHAIN_METADATA[fromChain].rpc);
@@ -139,32 +140,132 @@ export async function executeXCMTransfer(
     const decimals = getTokenDecimals(fromChain);
     const amountInPlanck = BigInt(Math.floor(parseFloat(amount) * Math.pow(10, decimals)));
 
-    // Build XCM transfer based on the route
-    // For simplicity, we'll use polkadotXcm.limitedTeleportAssets for relay->parachain
-    // and xcmPallet.limitedReserveTransferAssets for parachain->relay
+    // Decode SS58 address to raw 32-byte account ID
+    const accountId = decodeAddress(recipient);
     
+    console.log('📝 Account ID (32 bytes):', accountId);
+
+    // Build XCM transfer based on the route
     let tx;
     
     if (fromChain === 'polkadot') {
       // From Relay Chain to Parachain - use teleport
       const parachainId = getParachainId(toChain);
       
-      tx = api.tx.xcmPallet?.limitedTeleportAssets(
-        { V3: { parents: 0, interior: { X1: { Parachain: parachainId } } } }, // destination
-        { V3: { parents: 0, interior: { X1: { AccountId32: { id: recipient, network: null } } } } }, // beneficiary
-        { V3: [{ id: { Concrete: { parents: 0, interior: 'Here' } }, fun: { Fungible: amountInPlanck.toString() } }] }, // assets
-        0, // fee_asset_item
-        'Unlimited' // weight_limit
-      );
+      // Build destination
+      const dest = api.createType('XcmVersionedLocation', {
+        V3: {
+          parents: 0,
+          interior: {
+            X1: {
+              Parachain: parachainId
+            }
+          }
+        }
+      });
+
+      // Build beneficiary with raw account ID
+      const beneficiary = api.createType('XcmVersionedLocation', {
+        V3: {
+          parents: 0,
+          interior: {
+            X1: {
+              AccountId32: {
+                id: accountId,
+                network: null
+              }
+            }
+          }
+        }
+      });
+
+      // Build assets
+      const assets = api.createType('XcmVersionedAssets', {
+        V3: [{
+          id: {
+            Concrete: {
+              parents: 0,
+              interior: 'Here'
+            }
+          },
+          fun: {
+            Fungible: amountInPlanck.toString()
+          }
+        }]
+      });
+
+      // Check if xcmPallet exists
+      if (api.tx.xcmPallet?.limitedTeleportAssets) {
+        tx = api.tx.xcmPallet.limitedTeleportAssets(
+          dest,
+          beneficiary,
+          assets,
+          0, // fee_asset_item
+          'Unlimited' // weight_limit
+        );
+      } else if (api.tx.polkadotXcm?.limitedTeleportAssets) {
+        tx = api.tx.polkadotXcm.limitedTeleportAssets(
+          dest,
+          beneficiary,
+          assets,
+          0,
+          'Unlimited'
+        );
+      }
     } else {
-      // From Parachain to Relay Chain or another Parachain - use reserve transfer
-      tx = api.tx.polkadotXcm?.limitedReserveTransferAssets(
-        { V3: { parents: 1, interior: 'Here' } }, // destination (relay chain)
-        { V3: { parents: 0, interior: { X1: { AccountId32: { id: recipient, network: null } } } } }, // beneficiary
-        { V3: [{ id: { Concrete: { parents: 1, interior: 'Here' } }, fun: { Fungible: amountInPlanck.toString() } }] }, // assets
-        0, // fee_asset_item
-        'Unlimited' // weight_limit
-      );
+      // From Parachain to Relay Chain - use reserve transfer
+      const dest = api.createType('XcmVersionedLocation', {
+        V3: {
+          parents: 1,
+          interior: 'Here'
+        }
+      });
+
+      const beneficiary = api.createType('XcmVersionedLocation', {
+        V3: {
+          parents: 0,
+          interior: {
+            X1: {
+              AccountId32: {
+                id: accountId,
+                network: null
+              }
+            }
+          }
+        }
+      });
+
+      const assets = api.createType('XcmVersionedAssets', {
+        V3: [{
+          id: {
+            Concrete: {
+              parents: 1,
+              interior: 'Here'
+            }
+          },
+          fun: {
+            Fungible: amountInPlanck.toString()
+          }
+        }]
+      });
+
+      if (api.tx.polkadotXcm?.limitedReserveTransferAssets) {
+        tx = api.tx.polkadotXcm.limitedReserveTransferAssets(
+          dest,
+          beneficiary,
+          assets,
+          0,
+          'Unlimited'
+        );
+      } else if (api.tx.xcmPallet?.limitedReserveTransferAssets) {
+        tx = api.tx.xcmPallet.limitedReserveTransferAssets(
+          dest,
+          beneficiary,
+          assets,
+          0,
+          'Unlimited'
+        );
+      }
     }
 
     if (!tx) {
@@ -181,20 +282,28 @@ export async function executeXCMTransfer(
     console.log('📝 Signing transaction...');
 
     // Sign and send transaction
-    const unsub = await tx.signAndSend(
-      recipient,
-      { signer: injector.signer },
-      ({ status, events }) => {
-        console.log('Transaction status:', status.type);
+    let txHash = '';
+    await new Promise<void>((resolve, reject) => {
+      tx.signAndSend(
+        recipient,
+        { signer: injector.signer },
+        ({ status, events }) => {
+          console.log('Transaction status:', status.type);
 
-        if (status.isInBlock) {
-          console.log('✅ Included in block:', status.asInBlock.toHex());
+          if (status.isInBlock) {
+            console.log('✅ Included in block:', status.asInBlock.toHex());
+            txHash = status.asInBlock.toHex();
+            resolve();
+          } else if (status.isFinalized) {
+            console.log('✅ Finalized in block:', status.asFinalized.toHex());
+            txHash = status.asFinalized.toHex();
+            resolve();
+          } else if (status.isInvalid || status.isDropped || status.isUsurped) {
+            reject(new Error('Transaction failed'));
+          }
         }
-      }
-    );
-
-    // Wait a bit for transaction to be included
-    await new Promise(resolve => setTimeout(resolve, 3000));
+      ).catch(reject);
+    });
     
     await api.disconnect();
     
@@ -202,8 +311,8 @@ export async function executeXCMTransfer(
     
     return {
       success: true,
-      txHash: 'Transaction submitted - check your wallet for confirmation',
-      explorerUrl: `https://polkadot.js.org/apps/?rpc=${CHAIN_METADATA[fromChain].rpc}#/explorer`
+      txHash: txHash || 'Transaction submitted - check your wallet',
+      explorerUrl: `https://polkadot.js.org/apps/?rpc=${encodeURIComponent(CHAIN_METADATA[fromChain].rpc)}#/explorer/query/${txHash}`
     };
     
   } catch (error) {
@@ -216,6 +325,8 @@ export async function executeXCMTransfer(
         errorMsg = 'Transaction cancelled by user';
       } else if (error.message.includes('pallet')) {
         errorMsg = 'XCM pallet not available on this testnet. Try Polkadot → Asset Hub route.';
+      } else if (error.message.includes('decode')) {
+        errorMsg = 'Failed to build XCM message. Chain metadata may be incompatible.';
       } else {
         errorMsg = error.message;
       }
