@@ -37,20 +37,32 @@ export function PortfolioPieChart() {
     );
   }
 
-  // Prepare data for chart - show ALL chains with balance, even very small ones
-  const chartData = portfolio.chains
-    .filter(c => c.totalValue > 0.001) // Show even very small balances (above $0.001)
-    .map(chain => ({
-      name: chain.chainName,
-      value: chain.totalValue,
-      percentage: chain.percentage,
-      color: CHAINS[chain.chain].color
-    }));
+  // Prepare data for chart - show ALL chains that exist in portfolio
+  // Even if they have 0 balance, show them with at least 0.01% for demo purposes
+  const allChains = portfolio.chains.map(chain => ({
+    name: chain.chainName,
+    value: chain.totalValue > 0 ? chain.totalValue : 0.01, // Show at least a sliver for demo
+    actualValue: chain.totalValue,
+    percentage: chain.percentage,
+    color: CHAINS[chain.chain].color,
+    hasBalance: chain.totalValue > 0
+  }));
+
+  // Filter out chains with zero balance UNLESS we're showing all 4 for demo
+  const chartData = portfolio.totalValue === 0 
+    ? [] // If no portfolio at all, show nothing
+    : allChains.filter(c => c.actualValue > 0.001 || allChains.filter(x => x.actualValue > 0).length < 4);
+  
+  // If we have less than 4 chains showing but we have 4 chains total, show all of them
+  const finalChartData = chartData.length < 4 && allChains.length === 4 
+    ? allChains // Show all 4 chains even if some have zero balance
+    : chartData.filter(c => c.actualValue > 0.001);
 
   console.log('Portfolio chains for pie chart:', portfolio.chains);
-  console.log('Chart data:', chartData);
+  console.log('All chains data:', allChains);
+  console.log('Final chart data:', finalChartData);
 
-  if (chartData.length === 0) {
+  if (finalChartData.length === 0) {
     return null;
   }
 
@@ -83,16 +95,16 @@ export function PortfolioPieChart() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={chartData}
+                data={finalChartData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={(entry) => `${entry.name} ${entry.percentage.toFixed(1)}%`}
+                label={(entry) => `${entry.name} ${entry.percentage > 0.1 ? entry.percentage.toFixed(1) : '<0.1'}%`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
               >
-                {chartData.map((entry, index) => (
+                {finalChartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -110,7 +122,7 @@ export function PortfolioPieChart() {
 
         {/* Chain Legend with values */}
         <div className="mt-4 grid grid-cols-2 gap-3">
-          {chartData.map((chain) => (
+          {finalChartData.map((chain) => (
             <div 
               key={chain.name}
               className="flex items-center gap-3 rounded-lg border border-[var(--card-border)] bg-[var(--hover)] p-3"
@@ -121,10 +133,10 @@ export function PortfolioPieChart() {
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                  {chain.name}
+                  {chain.name} {!chain.hasBalance && '(Empty)'}
                 </p>
                 <p className="text-xs text-[var(--text-secondary)]">
-                  {formatUSD(chain.value)}
+                  {chain.actualValue > 0 ? formatUSD(chain.actualValue) : '$0.00'}
                 </p>
               </div>
             </div>
