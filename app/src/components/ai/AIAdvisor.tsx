@@ -115,49 +115,39 @@ export function AIAdvisor() {
   ];
 
   return (
-    <Card>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-[var(--polkadot-pink)] to-[var(--astar-blue)]">
-            <Brain className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">AI Portfolio Advisor</h2>
-            <p className="text-sm text-[var(--text-secondary)]">
-              Powered by Groq AI • Polkadot Ecosystem Expert
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setChatMode(false)}
-            variant={!chatMode ? 'primary' : 'secondary'}
-            size="sm"
-          >
-            <TrendingUp className="h-4 w-4 mr-1" />
-            Insights
-          </Button>
-          <Button
-            onClick={() => setChatMode(true)}
-            variant={chatMode ? 'primary' : 'secondary'}
-            size="sm"
-          >
-            <MessageSquare className="h-4 w-4 mr-1" />
-            Chat
-          </Button>
-        </div>
+    <div className="h-full flex flex-col">
+      {/* Mode Toggle */}
+      <div className="flex gap-2 mb-4 p-2 bg-[var(--background)]/50 rounded-lg">
+        <Button
+          onClick={() => setChatMode(false)}
+          variant={!chatMode ? 'primary' : 'secondary'}
+          size="sm"
+          className="flex-1"
+        >
+          <TrendingUp className="h-4 w-4 mr-1" />
+          Insights
+        </Button>
+        <Button
+          onClick={() => setChatMode(true)}
+          variant={chatMode ? 'primary' : 'secondary'}
+          size="sm"
+          className="flex-1"
+        >
+          <MessageSquare className="h-4 w-4 mr-1" />
+          Chat
+        </Button>
       </div>
 
       {/* Insights Mode */}
       {!chatMode && (
-        <div>
+        <div className="flex-1 overflow-y-auto">
           {!insights && !isLoading && (
-            <div className="text-center py-8">
-              <Sparkles className="h-12 w-12 mx-auto mb-4 text-[var(--polkadot-pink)]" />
-              <p className="text-[var(--text-secondary)] mb-4">
+            <div className="text-center py-6">
+              <Sparkles className="h-10 w-10 mx-auto mb-3 text-[var(--polkadot-pink)]" />
+              <p className="text-[var(--text-secondary)] text-sm mb-4 px-4">
                 Get AI-powered analysis of your cross-chain portfolio
               </p>
-              <Button onClick={handleGetInsights} variant="primary">
+              <Button onClick={handleGetInsights} variant="primary" className="w-full">
                 <Brain className="h-4 w-4 mr-2" />
                 Analyze My Portfolio
               </Button>
@@ -201,21 +191,21 @@ export function AIAdvisor() {
 
       {/* Chat Mode */}
       {chatMode && (
-        <div>
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Chat History */}
-          <div className="space-y-4 mb-4 max-h-[400px] overflow-y-auto">
+          <div className="flex-1 space-y-4 mb-4 overflow-y-auto px-1">
             {chatHistory.length === 0 && (
-              <div className="text-center py-8">
-                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-[var(--astar-blue)]" />
-                <p className="text-[var(--text-secondary)] mb-4">
-                  Ask me anything about your portfolio or Polkadot ecosystem
+              <div className="text-center py-6">
+                <MessageSquare className="h-10 w-10 mx-auto mb-3 text-[var(--astar-blue)]" />
+                <p className="text-[var(--text-secondary)] text-sm mb-3">
+                  Ask me anything about your portfolio
                 </p>
-                <div className="flex flex-wrap gap-2 justify-center">
+                <div className="flex flex-wrap gap-2 justify-center px-2">
                   {suggestedQuestions.map((q, i) => (
                     <button
                       key={i}
                       onClick={() => setQuestion(q)}
-                      className="text-sm px-3 py-1.5 rounded-full bg-[var(--card-background)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--polkadot-pink)] hover:text-[var(--text-primary)] transition-colors"
+                      className="text-xs px-2 py-1 rounded-full bg-[var(--card-background)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--polkadot-pink)] hover:text-[var(--text-primary)] transition-colors"
                     >
                       {q}
                     </button>
@@ -271,7 +261,7 @@ export function AIAdvisor() {
           )}
         </div>
       )}
-    </Card>
+    </div>
   );
 }
 

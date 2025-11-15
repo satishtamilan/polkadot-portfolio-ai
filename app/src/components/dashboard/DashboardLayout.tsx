@@ -15,7 +15,7 @@ import { AstarCard } from '@/components/chains/AstarCard';
 import { MoonbeamCard } from '@/components/chains/MoonbeamCard';
 import { AcalaCard } from '@/components/chains/AcalaCard';
 import { PortfolioPieChart } from '@/components/charts/PortfolioPieChart';
-import { AIAdvisor } from '@/components/ai/AIAdvisor';
+import { FloatingAIChat } from '@/components/ai/FloatingAIChat';
 import { Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -64,8 +64,8 @@ export function DashboardLayout() {
 
   // Show dashboard when connected
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
-      {/* Main Content - Left Side */}
+    <>
+      {/* Main Content - Full Width */}
       <div className="space-y-6">
         {/* Wallet Info */}
         <WalletInfo />
@@ -85,11 +85,9 @@ export function DashboardLayout() {
         <PortfolioPieChart />
       </div>
 
-      {/* AI Portfolio Advisor - Right Sidebar (Sticky) */}
-      <div className="lg:sticky lg:top-20 lg:h-fit">
-        <AIAdvisor />
-      </div>
-    </div>
+      {/* Floating AI Chat - Bottom Right Corner */}
+      <FloatingAIChat />
+    </>
   );
 }
 
