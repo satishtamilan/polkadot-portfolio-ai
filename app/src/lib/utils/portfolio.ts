@@ -57,22 +57,32 @@ export function aggregatePortfolio(
 
   // Process each chain
   for (const [chainId, balance] of balances.entries()) {
-    if (!balance) continue;
-
     const chainConfig = CHAINS[chainId];
+    
+    // Even if balance is null or zero, include the chain for complete portfolio view
+    const actualBalance = balance || {
+      chain: chainId,
+      token: chainConfig.token,
+      free: '0',
+      reserved: '0',
+      frozen: '0',
+      total: '0',
+      usdValue: 0
+    };
+
     const price = prices.get(chainConfig.token);
     const priceUsd = price?.usd || 0;
     const change24h = price?.change24h || 0;
 
     // Calculate chain value
     const chainValue = calculateUsdValue(
-      balance.total,
+      actualBalance.total,
       chainConfig.decimals,
       priceUsd
     );
 
     // Format balance for human readability
-    const formattedBalance = formatBalance(balance.total, chainConfig.decimals);
+    const formattedBalance = formatBalance(actualBalance.total, chainConfig.decimals);
 
     totalValue += chainValue;
 
@@ -81,7 +91,7 @@ export function aggregatePortfolio(
       chainName: chainConfig.name,
       token: chainConfig.token,
       balance: formattedBalance, // Formatted balance
-      balances: [{ ...balance, usdValue: chainValue }],
+      balances: [{ ...actualBalance, usdValue: chainValue }],
       totalValue: chainValue,
       percentage: 0, // Will be calculated after we know total
       change24h: change24h
