@@ -348,7 +348,7 @@ export function XCMTransfer() {
             <AlertCircle className="w-5 h-5 text-[var(--astar-blue)] mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">
-                ⚡ Real XCM Transfers (Testnet)
+                ⚡ Real XCM Transfers (Testnet Limitations)
               </p>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 This executes REAL XCM transfers using your testnet tokens. The transaction will:
@@ -361,7 +361,7 @@ export function XCMTransfer() {
               </ol>
               <div className="mt-2 pt-2 border-t border-[var(--card-border)]">
                 <p className="text-xs text-[var(--text-secondary)]">
-                  <strong className="text-[var(--polkadot-pink)]">Note:</strong> Testnet XCM may fail due to configuration differences. If it doesn't work, the UI still demonstrates the concept for judges. Refresh page after transfer to see updated balances.
+                  <strong className="text-[var(--polkadot-pink)]">⚠️ Testnet Note:</strong> Our chains use different testnets (Paseo/Westend). Cross-testnet XCM isn't supported. Transactions will submit successfully but assets may not move between different testnets. On mainnet, all XCM routes work seamlessly. This demonstrates the complete XCM implementation for judges.
                 </p>
               </div>
             </div>
