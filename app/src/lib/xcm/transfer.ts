@@ -97,22 +97,21 @@ export function validateXCMTransfer(
 }
 
 /**
- * Execute XCM transfer
+ * Execute XCM transfer - REAL implementation for testnet
  * 
- * DEMO MODE: For hackathon demonstration, this simulates the transfer.
- * Production implementation would:
- * 1. Connect to source chain
- * 2. Build XCM message using limitedReserveTransferAssets or limitedTeleportAssets
- * 3. Sign and submit transaction
- * 4. Monitor cross-chain message delivery
+ * This executes actual XCM transfers on testnet chains.
+ * NOTE: XCM support varies by testnet. Some routes may not work due to:
+ * - Testnet configuration differences
+ * - XCM channel availability
+ * - Pallet availability on specific testnets
  */
 export async function executeXCMTransfer(
   params: XCMTransferParams
 ): Promise<XCMTransferResult> {
   try {
-    const { fromChain, toChain, amount } = params;
+    const { fromChain, toChain, amount, recipient } = params;
     
-    console.log('🚀 Initiating XCM transfer:', params);
+    console.log('🚀 Initiating REAL XCM transfer:', params);
     
     const route = getRoute(fromChain, toChain);
     if (!route) {
@@ -121,94 +120,138 @@ export async function executeXCMTransfer(
         error: 'Route not available'
       };
     }
-    
-    // DEMO: Simulate transaction delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // DEMO: Generate mock transaction hash
-    const mockTxHash = `0x${Math.random().toString(16).slice(2, 66)}`;
-    
-    console.log('✅ XCM transfer simulated:', mockTxHash);
-    
-    return {
-      success: true,
-      txHash: mockTxHash,
-      explorerUrl: `https://polkadot.subscan.io/extrinsic/${mockTxHash}`
-    };
-    
-    /* PRODUCTION CODE (commented for demo):
+
+    // Check if we're in browser environment
+    if (typeof window === 'undefined') {
+      throw new Error('XCM transfers only work in browser');
+    }
+
+    // Dynamically import Polkadot extension functions
+    const { web3FromAddress } = await import('@polkadot/extension-dapp');
     
     // Connect to source chain
     const provider = new WsProvider(CHAIN_METADATA[fromChain].rpc);
     const api = await ApiPromise.create({ provider });
     
-    // Build XCM message
-    const dest = {
-      V3: {
-        parents: 1,
-        interior: {
-          X1: { Parachain: getParachainId(toChain) }
+    console.log('✅ Connected to', CHAIN_METADATA[fromChain].name);
+
+    // Get decimals for the token
+    const decimals = getTokenDecimals(fromChain);
+    const amountInPlanck = BigInt(Math.floor(parseFloat(amount) * Math.pow(10, decimals)));
+
+    // Build XCM transfer based on the route
+    // For simplicity, we'll use polkadotXcm.limitedTeleportAssets for relay->parachain
+    // and xcmPallet.limitedReserveTransferAssets for parachain->relay
+    
+    let tx;
+    
+    if (fromChain === 'polkadot') {
+      // From Relay Chain to Parachain - use teleport
+      const parachainId = getParachainId(toChain);
+      
+      tx = api.tx.xcmPallet?.limitedTeleportAssets(
+        { V3: { parents: 0, interior: { X1: { Parachain: parachainId } } } }, // destination
+        { V3: { parents: 0, interior: { X1: { AccountId32: { id: recipient, network: null } } } } }, // beneficiary
+        { V3: [{ id: { Concrete: { parents: 0, interior: 'Here' } }, fun: { Fungible: amountInPlanck.toString() } }] }, // assets
+        0, // fee_asset_item
+        'Unlimited' // weight_limit
+      );
+    } else {
+      // From Parachain to Relay Chain or another Parachain - use reserve transfer
+      tx = api.tx.polkadotXcm?.limitedReserveTransferAssets(
+        { V3: { parents: 1, interior: 'Here' } }, // destination (relay chain)
+        { V3: { parents: 0, interior: { X1: { AccountId32: { id: recipient, network: null } } } } }, // beneficiary
+        { V3: [{ id: { Concrete: { parents: 1, interior: 'Here' } }, fun: { Fungible: amountInPlanck.toString() } }] }, // assets
+        0, // fee_asset_item
+        'Unlimited' // weight_limit
+      );
+    }
+
+    if (!tx) {
+      await api.disconnect();
+      return {
+        success: false,
+        error: 'XCM pallet not available on this chain. This testnet may not support XCM yet.'
+      };
+    }
+
+    // Get injector for signing
+    const injector = await web3FromAddress(recipient);
+    
+    console.log('📝 Signing transaction...');
+
+    // Sign and send transaction
+    const unsub = await tx.signAndSend(
+      recipient,
+      { signer: injector.signer },
+      ({ status, events }) => {
+        console.log('Transaction status:', status.type);
+
+        if (status.isInBlock) {
+          console.log('✅ Included in block:', status.asInBlock.toHex());
         }
       }
-    };
-    
-    const beneficiary = {
-      V3: {
-        parents: 0,
-        interior: {
-          X1: {
-            AccountId32: {
-              id: params.recipient,
-              network: null
-            }
-          }
-        }
-      }
-    };
-    
-    const assets = {
-      V3: [{
-        id: {
-          Concrete: {
-            parents: 0,
-            interior: 'Here'
-          }
-        },
-        fun: {
-          Fungible: parseUnits(amount, decimals)
-        }
-      }]
-    };
-    
-    // Execute transfer
-    const tx = api.tx.xcmPallet.limitedReserveTransferAssets(
-      dest,
-      beneficiary,
-      assets,
-      0, // fee_asset_item
-      'Unlimited' // weight_limit
     );
-    
-    // Sign and send
-    const injector = await web3FromAddress(params.sender);
-    const hash = await tx.signAndSend(params.sender, { signer: injector.signer });
+
+    // Wait a bit for transaction to be included
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
     await api.disconnect();
     
+    console.log('✅ XCM transfer submitted successfully!');
+    
     return {
       success: true,
-      txHash: hash.toString(),
-      explorerUrl: getExplorerUrl(fromChain, hash.toString())
+      txHash: 'Transaction submitted - check your wallet for confirmation',
+      explorerUrl: `https://polkadot.js.org/apps/?rpc=${CHAIN_METADATA[fromChain].rpc}#/explorer`
     };
-    */
     
   } catch (error) {
     console.error('XCM transfer error:', error);
+    
+    // Provide helpful error messages
+    let errorMsg = 'Transfer failed';
+    if (error instanceof Error) {
+      if (error.message.includes('Cancelled')) {
+        errorMsg = 'Transaction cancelled by user';
+      } else if (error.message.includes('pallet')) {
+        errorMsg = 'XCM pallet not available on this testnet. Try Polkadot → Asset Hub route.';
+      } else {
+        errorMsg = error.message;
+      }
+    }
+    
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Transfer failed'
+      error: errorMsg
     };
   }
+}
+
+/**
+ * Get token decimals for a chain
+ */
+function getTokenDecimals(chainId: ChainId): number {
+  const decimals: Record<ChainId, number> = {
+    polkadot: 10, // DOT
+    astar: 12,    // ASTR  
+    moonbeam: 12, // GLMR
+    acala: 10     // PAS
+  };
+  return decimals[chainId];
+}
+
+/**
+ * Get parachain ID for XCM routing
+ */
+function getParachainId(chainId: ChainId): number {
+  const parachainIds: Record<ChainId, number> = {
+    polkadot: 0,     // Relay chain
+    astar: 1000,     // Westend parachain ID (for testnet)
+    moonbeam: 1002,  // Westend Asset Hub
+    acala: 1000      // Paseo Asset Hub
+  };
+  return parachainIds[chainId];
 }
 
 /**
