@@ -37,26 +37,18 @@ export function PortfolioPieChart() {
     );
   }
 
-  // Prepare data for chart - show ALL chains that exist in portfolio
-  // Even if they have 0 balance, show them with at least 0.01% for demo purposes
+  // Prepare data for chart - ALWAYS show ALL 4 chains
   const allChains = portfolio.chains.map(chain => ({
     name: chain.chainName,
-    value: chain.totalValue > 0 ? chain.totalValue : 0.01, // Show at least a sliver for demo
+    value: chain.totalValue > 0 ? chain.totalValue : 0.01, // Show at least 0.01 for visibility
     actualValue: chain.totalValue,
     percentage: chain.percentage,
     color: CHAINS[chain.chain].color,
     hasBalance: chain.totalValue > 0
   }));
 
-  // Filter out chains with zero balance UNLESS we're showing all 4 for demo
-  const chartData = portfolio.totalValue === 0 
-    ? [] // If no portfolio at all, show nothing
-    : allChains.filter(c => c.actualValue > 0.001 || allChains.filter(x => x.actualValue > 0).length < 4);
-  
-  // If we have less than 4 chains showing but we have 4 chains total, show all of them
-  const finalChartData = chartData.length < 4 && allChains.length === 4 
-    ? allChains // Show all 4 chains even if some have zero balance
-    : chartData.filter(c => c.actualValue > 0.001);
+  // Use ALL chains - don't filter any out!
+  const finalChartData = allChains;
 
   console.log('Portfolio chains for pie chart:', portfolio.chains);
   console.log('All chains data:', allChains);
