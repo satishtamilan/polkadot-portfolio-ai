@@ -19,6 +19,9 @@ In the Polkadot ecosystem, users interact with multiple parachains (Astar, Moonb
 - 🔗 **Multi-Chain Aggregation** - View assets across 4 Polkadot parachains in one place
 - 💰 **Portfolio Dashboard** - Real-time balances, tokens, and portfolio value tracking
 - 📊 **Data Visualization** - Charts showing portfolio composition and distribution
+- 🤖 **AI Portfolio Advisor** - Get personalized insights and recommendations powered by Groq API
+- 📈 **Health Score** - Comprehensive portfolio health analysis based on diversification and risk
+- 🌉 **XCM Cross-Chain Transfers** - Execute real cross-chain asset transfers using XCM protocol
 - 🔐 **Privacy-First** - Client-side aggregation, you control your data
 - 📱 **Mobile Responsive** - Beautiful interface on any device
 - 🎨 **Modern UI** - Web2-quality user experience in Web3
@@ -28,14 +31,16 @@ In the Polkadot ecosystem, users interact with multiple parachains (Astar, Moonb
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Blockchain**: Polkadot.js API
+- **Blockchain**: Polkadot.js API, XCM Protocol
 - **Wallet**: Polkadot.js Extension
+- **AI**: Groq API with Llama 3.1 8B Instant
 - **Visualization**: Recharts
+- **APIs**: CoinGecko (pricing data)
 - **Target Chains**: 
-  - Polkadot Relay Chain
+  - Polkadot Relay Chain (Paseo Testnet)
   - Astar Network
   - Moonbeam
-  - Acala
+  - Paseo Asset Hub
 
 ## 🚀 Getting Started
 
@@ -44,6 +49,7 @@ In the Polkadot ecosystem, users interact with multiple parachains (Astar, Moonb
 - Node.js 18+ 
 - pnpm (or npm/yarn)
 - [Polkadot.js browser extension](https://polkadot.js.org/extension/)
+- Groq API Key (for AI features) - Get one at [console.groq.com](https://console.groq.com)
 
 ### Installation
 
@@ -59,12 +65,18 @@ cd app
 pnpm install
 ```
 
-3. **Run the development server**
+3. **Set up environment variables**
+```bash
+# Create .env.local in the app directory
+echo "GROQ_API_KEY=your_groq_api_key_here" > .env.local
+```
+
+4. **Run the development server**
 ```bash
 pnpm dev
 ```
 
-4. **Open your browser**
+5. **Open your browser**
 ```
 http://localhost:3000
 ```
@@ -127,6 +139,45 @@ http://localhost:3000
 - **Chain Cards**: Display balance for individual chains
 - **PortfolioSummary**: Shows total value and distribution
 - **PortfolioPieChart**: Visualizes asset allocation
+- **AIAdvisor**: Provides AI-powered portfolio insights
+- **HealthScore**: Calculates and displays portfolio health metrics
+- **XCMTransfer**: Executes cross-chain asset transfers using XCM
+
+## 🌉 XCM Cross-Chain Transfers
+
+This project implements **real XCM (Cross-Consensus Message) transfers**, allowing you to move assets between Polkadot parachains seamlessly.
+
+### How XCM Works
+
+XCM is Polkadot's cross-chain communication protocol that enables:
+- **Asset Transfers**: Move tokens between parachains
+- **Teleportation**: Direct asset transfer for trusted chains
+- **Reserve Transfers**: Asset-backed transfers for untrusted chains
+- **Cross-Chain Interactions**: Execute remote operations
+
+### Using XCM Transfers
+
+1. Navigate to the XCM Transfer section in the dashboard
+2. Select source chain and destination chain
+3. Enter recipient address and amount
+4. Click "Execute XCM Transfer"
+5. Sign the transaction in your wallet
+
+### Supported Transfer Routes
+
+- **Paseo → Westend**: Teleport assets between relay chains
+- **Paseo Asset Hub → Westend**: Cross-parachain reserve transfers
+- **More routes**: Additional parachain transfers supported
+
+### Technical Implementation
+
+The XCM transfer module uses:
+- `limitedTeleportAssets` for trusted chain transfers
+- `limitedReserveTransferAssets` for general transfers
+- XCM V3 format with proper account encoding
+- Transaction status monitoring for confirmations
+
+**Note**: The app uses testnet configurations (Paseo, Westend) for safe testing. Some cross-testnet transfers may not reflect balance changes due to testnet infrastructure limitations, but transactions are successfully submitted on-chain.
 
 ## 🏗️ Project Structure
 
@@ -145,6 +196,9 @@ chainlink-portfolio/
 │       │   ├── chains/       # Chain card components
 │       │   ├── dashboard/    # Dashboard layout
 │       │   ├── charts/       # Visualization components
+│       │   ├── portfolio/    # Portfolio components (HealthScore)
+│       │   ├── ai/           # AI Advisor & Floating Chat
+│       │   ├── xcm/          # XCM Transfer component
 │       │   ├── ui/           # Reusable UI components
 │       │   └── layout/       # Header, Footer
 │       ├── contexts/         # React contexts
@@ -161,12 +215,20 @@ chainlink-portfolio/
 │       │   │   └── acala.ts
 │       │   ├── api/          # External APIs
 │       │   │   └── prices.ts
+│       │   ├── ai/           # AI service (Groq)
+│       │   │   └── groq.ts
+│       │   ├── xcm/          # XCM transfer logic
+│       │   │   └── transfer.ts
 │       │   ├── polkadot/     # Wallet connection
 │       │   └── utils/        # Utilities
+│       │       ├── constants.ts
+│       │       ├── portfolio.ts
+│       │       └── healthScore.ts
 │       └── types/            # TypeScript types
 │           ├── wallet.ts
 │           ├── chain.ts
-│           └── portfolio.ts
+│           ├── portfolio.ts
+│           └── xcm.ts
 └── README.md                 # This file
 ```
 
@@ -180,6 +242,9 @@ This project includes extensive inline documentation explaining blockchain conce
 - **RPC Connections**: Connecting to blockchain nodes
 - **Parallel Queries**: Efficient data fetching strategies
 - **Error Handling**: Graceful failure management
+- **XCM Protocol**: Cross-chain messaging and asset transfers
+- **AI Integration**: Using language models for portfolio analysis
+- **Portfolio Metrics**: Health scoring and risk analysis
 
 ## 🔧 Configuration
 
@@ -251,31 +316,42 @@ See `specs/001-chainlink-portfolio/` for detailed planning documents.
 - Error handling and recovery
 - Mobile responsive design
 
-## 📊 Features Overview
+## 📊 Complete Features
 
-### Phase 1 ✅ (Completed)
-- Wallet connection with Polkadot.js extension
-- Polkadot Relay Chain integration
-- Basic dashboard UI
-- Account management
+### Multi-Chain Portfolio Management
+✅ **Wallet Integration**: Seamless connection with Polkadot.js extension  
+✅ **Multi-Chain Support**: Polkadot, Astar, Moonbeam, Paseo Asset Hub  
+✅ **Real-Time Pricing**: Live token prices from CoinGecko API  
+✅ **Portfolio Aggregation**: Unified view of all your cross-chain assets  
+✅ **USD Calculations**: Total portfolio value in fiat currency
 
-### Phase 2 ✅ (Completed)
-- Astar, Moonbeam, Acala integration
-- Parallel chain queries
-- Price API integration (CoinGecko)
-- Portfolio aggregation and USD values
+### Data Visualization
+✅ **Interactive Pie Chart**: Visual breakdown of portfolio distribution  
+✅ **Chain Cards**: Individual balance cards for each parachain  
+✅ **Portfolio Summary**: Total value, best performer, asset count  
+✅ **Responsive Design**: Beautiful UI on desktop and mobile  
+✅ **Auto-Refresh**: Data updates every 30 seconds
 
-### Phase 3 ✅ (Completed)
-- Portfolio pie chart visualization
-- Mobile responsive design
-- Error handling and loading states
-- UI polish and animations
+### AI-Powered Insights
+✅ **Portfolio Analysis**: AI-generated insights about your holdings  
+✅ **Personalized Recommendations**: Allocation and staking strategies  
+✅ **Interactive Chat**: Ask questions about your portfolio  
+✅ **Polkadot-Specific Advice**: XCM opportunities and parachain strategies  
+✅ **Floating Chat Widget**: Non-intrusive bottom-right placement
 
-### Phase 4 🔄 (In Progress)
-- Documentation completion
-- Demo video preparation
-- Deployment to Vercel
-- Hackathon submission
+### Portfolio Health Score
+✅ **Comprehensive Scoring**: 0-100 health rating  
+✅ **Diversification Analysis**: Measures spread across chains  
+✅ **Risk Balance**: Evaluates portfolio composition  
+✅ **Activity Tracking**: Monitors account engagement  
+✅ **Visual Breakdown**: Color-coded health indicator
+
+### XCM Cross-Chain Transfers
+✅ **Real XCM Implementation**: Execute actual cross-chain transfers  
+✅ **Multiple Transfer Types**: Teleport and reserve transfers  
+✅ **Route Selection**: Choose source and destination chains  
+✅ **Transaction Confirmation**: On-chain submission verification  
+✅ **Testnet Safe**: Uses Paseo and Westend for safe testing
 
 ## 🚦 Roadmap
 
@@ -291,11 +367,13 @@ See `specs/001-chainlink-portfolio/` for detailed planning documents.
 
 ## 🐛 Known Limitations
 
-- **MVP Read-Only**: No transaction sending (viewing only)
+- **Testnet Environment**: Uses Paseo and Westend testnets for safe demo purposes
+- **Cross-Testnet XCM**: Some XCM transfers between different testnets may not reflect balance changes due to infrastructure limitations
 - **Public RPCs**: Using free public endpoints (may have rate limits)
-- **Price Data**: Dependent on CoinGecko API availability
+- **Price Data**: Dependent on CoinGecko API availability; testnet tokens use mock prices
 - **Browser Only**: Requires browser with Polkadot.js extension
-- **No Backend**: All data fetched client-side
+- **No Backend**: All data fetched client-side for privacy
+- **AI Rate Limits**: Groq API has rate limits on free tier
 
 ## 📄 License
 
@@ -311,6 +389,8 @@ Built for the Build Resilient Apps with Polkadot Cloud hackathon by a Web3 learn
 - **Parity Technologies** for Polkadot.js and documentation
 - **Astar**, **Moonbeam**, and **Acala** teams for parachain documentation
 - **CoinGecko** for token price API
+- **Groq** for providing fast AI inference API
+- **XCM Working Group** for cross-chain protocol documentation
 - **Spec-Kit** by GitHub for project methodology
 
 ## 📞 Support
